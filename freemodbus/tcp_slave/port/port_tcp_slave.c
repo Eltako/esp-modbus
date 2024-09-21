@@ -261,10 +261,6 @@ static void vMBTCPPortFreeClientInfo(MbClientInfo_t *pxClientInfo)
 
 static void vMBTCPPortShutdown(void)
 {
-    xSemaphoreGive(xShutdownSema);
-    vTaskDelete(NULL);
-    xConfig.xMbTcpTaskHandle = NULL;
-
     for (int i = 0; i < MB_TCP_PORT_MAX_CONN; i++) {
         MbClientInfo_t *pxClientInfo = xConfig.pxMbClientInfo[i];
         if ((pxClientInfo != NULL) && (pxClientInfo->xSockId > 0)) {
@@ -274,6 +270,9 @@ static void vMBTCPPortShutdown(void)
         }
     }
     free(xConfig.pxMbClientInfo);
+    xSemaphoreGive(xShutdownSema);
+    xConfig.xMbTcpTaskHandle = NULL;
+    vTaskDelete(NULL);
 }
 
 static int xMBTCPPortRxPoll(MbClientInfo_t *pxClientInfo, ULONG xTimeoutMs)
